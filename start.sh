@@ -94,15 +94,42 @@ unset HTTP_PROXY
 unset HTTPS_PROXY
 unset NO_PROXY
 
+# 预置多个 User-Agent headers 供尝试
+Headers=(
+    "User-Agent: clash"
+    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    "User-Agent: ClashX/1.118.0 (com.west2online.ClashX; build:1.118.0; macOS 14.0.0) Alamofire/5.8.1"
+)
 
 ## Clash 订阅地址检测及配置文件下载
 # 检查url是否有效
 echo -e '\n正在检测订阅地址...'
 Text1="Clash订阅地址可访问！"
 Text2="Clash订阅地址不可访问！"
-#curl -o /dev/null -s -m 10 --connect-timeout 10 -w %{http_code} $URL | grep '[23][0-9][0-9]' &>/dev/null
-curl -o /dev/null -L -k -sS --retry 5 -m 10 --connect-timeout 10 -w "%{http_code}" $URL | grep -E '^[23][0-9]{2}$' &>/dev/null
-ReturnStatus=$?
+
+# 尝试不同的 User-Agent 来检测订阅地址可访问性
+ReturnStatus=1
+WorkingHeader=""
+
+for Header in "${Headers[@]}"; do
+    
+    curl -o /dev/null -L -k -sS --retry 5 -m 10 --connect-timeout 10 \
+         -H "$Header" \
+         -w "%{http_code}" $URL | grep -E '^[23][0-9]{2}$' &>/dev/null
+    ReturnStatus=$?
+    
+    if [ $ReturnStatus -eq 0 ]; then
+        WorkingHeader="$Header"
+        echo $WorkingHeader
+        break
+    fi
+done
+
+if [ -z "$WorkingHeader" ]; then
+    WorkingHeader="${Headers[0]}"
+    echo "预置的 User-Agent 均不可用。"
+fi
+
 if_success $Text1 $Text2 $ReturnStatus
 
 # 拉取更新config.yml文件
@@ -110,14 +137,18 @@ echo -e '\n正在下载Clash配置文件...'
 Text3="配置文件config.yaml下载成功！"
 Text4="配置文件config.yaml下载失败，退出启动！"
 
-# 尝试使用curl进行下载
-curl -L -k -sS --retry 5 -m 10 -o $Temp_Dir/clash.yaml $URL
+# 使用在检测时找到的有效 Header 进行下载
+curl -L -k -sS --retry 5 -m 10 \
+     -H "$WorkingHeader" \
+     -o $Temp_Dir/clash.yaml $URL
 ReturnStatus=$?
 if [ $ReturnStatus -ne 0 ]; then
 	# 如果使用curl下载失败，尝试使用wget进行下载
 	for i in {1..10}
 	do
-		wget -q --no-check-certificate -O $Temp_Dir/clash.yaml $URL
+        wget -q --no-check-certificate \
+             --header "$WorkingHeader" \
+             -O $Temp_Dir/clash.yaml $URL
 		ReturnStatus=$?
 		if [ $ReturnStatus -eq 0 ]; then
 			break
@@ -134,8 +165,12 @@ if_success $Text3 $Text4 $ReturnStatus
 
 ## 判断订阅内容是否符合clash配置文件标准，尝试转换（当前不支持对 x86_64 以外的CPU架构服务器进行clash配置文件检测和转换，此功能将在后续添加）
 if [[ $CpuArch =~ "x86_64" || $CpuArch =~ "amd64" || $CpuArch =~ "arm64" ]]; then
-	echo -e '\n判断订阅内容是否符合clash配置文件标准:'
+	echo -e '\n判断订阅内容是否符合clash配置文件标准...'
+    Text7="配置文件转换成功！"
+    Text8="配置文件转换失败，退出启动！"
 	bash $Server_Dir/scripts/clash_profile_conversion.sh
+	ReturnStatus=$?
+    if_success $Text7 $Text8 $ReturnStatus
 	sleep 3
 fi
 
@@ -200,8 +235,8 @@ proxy_on() {
 	export http_proxy=http://127.0.0.1:7890
 	export https_proxy=http://127.0.0.1:7890
 	export no_proxy=127.0.0.1,localhost
-    	export HTTP_PROXY=http://127.0.0.1:7890
-    	export HTTPS_PROXY=http://127.0.0.1:7890
+    export HTTP_PROXY=http://127.0.0.1:7890
+    export HTTPS_PROXY=http://127.0.0.1:7890
  	export NO_PROXY=127.0.0.1,localhost
 	echo -e "\033[32m[√] 已开启代理\033[0m"
 }
