@@ -1,4 +1,8 @@
 #!/bin/bash
+# 杀死 Clash 服务
+
+
+#################### 函数定义 ####################
 
 # 自定义action函数，实现通用action功能
 success() {
@@ -36,17 +40,18 @@ if_success() {
   fi
 }
 
+#################### 任务执行 ####################
+
 # 关闭 clash 相关服务
 Text1="服务关闭成功！"
 Text2="服务关闭失败！"
+ReturnStatus=0
 
 # 查询并关闭相关程序进程： ./bin/clash-linux-*
 PID_NUM=`ps -ef | grep [c]lash-linux- | wc -l`
 PID=`ps -ef | grep [c]lash-linux- | awk '{print $2}'`
-ReturnStatus=0
 if [ $PID_NUM -ne 0 ]; then
   kill -9 $PID
   ReturnStatus=$?
-  # ps -ef | grep [c]lash-linux-a | awk '{print $2}' | xargs kill -9
 fi
 if_success $Text1 $Text2 $ReturnStatus

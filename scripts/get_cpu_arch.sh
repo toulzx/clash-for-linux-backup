@@ -1,9 +1,10 @@
 #!/bin/bash
-# 该脚本的作用是获取Linux操作系统上运行的CPU架构信息，并将其输出到标准输出流。
+# 获取 CPU 架构信息，并写入环境变量，因此请使用 source 命令加载此脚本
 
 function exitWithError {
     local errorMessage="$1"
     echo -e "\033[31m[ERROR] $errorMessage\033[0m" >&2
+    echo ""
     exit 1
 }
 
@@ -35,9 +36,6 @@ if [[ -f "/etc/os-release" ]]; then
         *)
             # Unsupported Linux distribution
             CpuArch=$(get_cpu_arch "uname -m" "arch" "uname")
-            if [[ -z "$CpuArch" ]]; then
-                exitWithError "Failed to obtain CPU architecture"
-            fi
             ;;
     esac
 elif [[ -f "/etc/redhat-release" ]]; then
@@ -46,5 +44,12 @@ elif [[ -f "/etc/redhat-release" ]]; then
 else
     exitWithError "Unsupported Linux distribution"
 fi
+
+if [[ -z "$CpuArch" ]]; then
+    exitWithError "Failed to obtain CPU architecture"
+fi
+
+# 写入环境变量
+export CPU_ARCH="$CpuArch"
 
 echo "CPU architecture: $CpuArch"

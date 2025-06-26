@@ -3,22 +3,23 @@
 # 加载系统函数库(Only for RHEL Linux)
 # [ -f /etc/init.d/functions ] && source /etc/init.d/functions
 
-#################### 脚本初始化任务 ####################
+#################### 变量设置 ####################
 
 # 获取脚本工作目录绝对路径
 export Server_Dir=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
+# 获取 CPU 架构信息
+if [ -z "$CPU_ARCH" ]; then
+    source $Server_Dir/scripts/get_cpu_arch.sh
+    ReturnStatus=$?
+    if [ $ReturnStatus -ne 0 ]; then
+        exit 1
+    fi
+fi
+CpuArch=$CPU_ARCH
+
 # 加载.env变量文件
 source $Server_Dir/.env
-
-# 给二进制启动程序、脚本等添加可执行权限
-chmod +x $Server_Dir/bin/*
-chmod +x $Server_Dir/scripts/*
-chmod +x $Server_Dir/tools/subconverter/subconverter
-
-
-
-#################### 变量设置 ####################
 
 Conf_Dir="$Server_Dir/conf"
 Temp_Dir="$Server_Dir/temp"
@@ -30,7 +31,12 @@ URL=${CLASH_URL:?Error: CLASH_URL variable is not set or empty}
 # 获取 CLASH_SECRET 值，如果不存在则生成一个随机数
 Secret=${CLASH_SECRET:-$(openssl rand -hex 32)}
 
+#################### 访问权限 ####################
 
+# 给二进制启动程序、脚本等添加可执行权限
+chmod +x $Server_Dir/bin/*
+chmod +x $Server_Dir/scripts/*
+chmod +x $Server_Dir/tools/subconverter/subconverter
 
 #################### 函数定义 ####################
 
@@ -73,18 +79,6 @@ if_success() {
 
 
 #################### 任务执行 ####################
-
-## 获取CPU架构信息
-# Source the script to get CPU architecture
-source $Server_Dir/scripts/get_cpu_arch.sh
-
-# Check if we obtained CPU architecture
-if [[ -z "$CpuArch" ]]; then
-	echo "Failed to obtain CPU architecture"
-	exit 1
-fi
-
-export CpuArch=$CpuArch
 
 ## 临时取消环境变量
 unset http_proxy
@@ -165,13 +159,9 @@ if_success $Text3 $Text4 $ReturnStatus
 
 ## 判断订阅内容是否符合 clash 配置文件标准，尝试转换（当前仅支持部分 CPU 架构的 clas 配置文件检测和转换）
 if [[ ($CpuArch =~ "x86_64" || $CpuArch =~ "amd64") || ($CpuArch =~ "arm64" || $CpuArch =~ "aarch64")  ]]; then
-	echo -e '\n判断订阅内容是否符合clash配置文件标准...'
-    Text7="配置文件转换成功！"
-    Text8="配置文件转换失败，退出启动！"
 	bash $Server_Dir/scripts/clash_profile_conversion.sh
 	ReturnStatus=$?
-    if_success $Text7 $Text8 $ReturnStatus
-	sleep 3
+	sleep 2
 fi
 
 
