@@ -41,18 +41,8 @@ Server_Dir=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 Conf_Dir="$Server_Dir/conf"
 Log_Dir="$Server_Dir/logs"
 
-## 关闭clash服务
-Text1="服务关闭成功！"
-Text2="服务关闭失败！"
-# 查询并关闭程序进程
-PID_NUM=`ps -ef | grep [c]lash-linux-a | wc -l`
-PID=`ps -ef | grep [c]lash-linux-a | awk '{print $2}'`
-if [ $PID_NUM -ne 0 ]; then
-	kill -9 $PID
-  ReturnStatus=$?
-	# ps -ef | grep [c]lash-linux-a | awk '{print $2}' | xargs kill -9
-fi
-if_success $Text1 $Text2 $ReturnStatus
+# 关闭 clash 相关服务
+source $Server_Dir/scripts/clash_server_killer.sh
 
 sleep 3
 

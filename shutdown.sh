@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# 关闭clash服务
-PID_NUM=`ps -ef | grep [c]lash-linux-a | wc -l`
-PID=`ps -ef | grep [c]lash-linux-a | awk '{print $2}'`
-if [ $PID_NUM -ne 0 ]; then
-	kill -9 $PID
-	# ps -ef | grep [c]lash-linux-a | awk '{print $2}' | xargs kill -9
-fi
+# 获取脚本工作目录绝对路径
+Server_Dir=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+# 关闭 clash 相关服务
+source $Server_Dir/scripts/clash_server_killer.sh
 
 # 清除环境变量
 > /etc/profile.d/clash.sh
+echo "/etc/profile.d/clash.sh 中环境变量配置已清除"
 
-echo -e "\n服务关闭成功，请执行以下命令关闭系统代理：proxy_off\n"
+echo "执行命令\`proxy_off\`以关闭本会话的系统代理"
