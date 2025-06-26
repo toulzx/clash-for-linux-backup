@@ -163,8 +163,8 @@ if_success $Text3 $Text4 $ReturnStatus
 \cp -a $Temp_Dir/clash.yaml $Temp_Dir/clash_config.yaml
 
 
-## 判断订阅内容是否符合clash配置文件标准，尝试转换（当前不支持对 x86_64 以外的CPU架构服务器进行clash配置文件检测和转换，此功能将在后续添加）
-if [[ $CpuArch =~ "x86_64" || $CpuArch =~ "amd64" || $CpuArch =~ "arm64" ]]; then
+## 判断订阅内容是否符合 clash 配置文件标准，尝试转换（当前仅支持部分 CPU 架构的 clas 配置文件检测和转换）
+if [[ ($CpuArch =~ "x86_64" || $CpuArch =~ "amd64") || ($CpuArch =~ "arm64" || $CpuArch =~ "aarch64")  ]]; then
 	echo -e '\n判断订阅内容是否符合clash配置文件标准...'
     Text7="配置文件转换成功！"
     Text8="配置文件转换失败，退出启动！"

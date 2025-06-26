@@ -61,7 +61,7 @@ fi
 ## 重启启动clash服务
 Text5="服务启动成功！"
 Text6="服务启动失败！"
-if [[ $CpuArch =~ "x86_64" ]]; then
+if [[ $CpuArch =~ "x86_64" || $CpuArch =~ "amd64" ]]; then
 	nohup $Server_Dir/bin/clash-linux-amd64 -d $Conf_Dir &> $Log_Dir/clash.log &
 	ReturnStatus=$?
 	if_success $Text5 $Text6 $ReturnStatus
