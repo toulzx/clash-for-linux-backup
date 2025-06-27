@@ -1,53 +1,10 @@
 [TOC]
 
+> 项目介绍、免责声明、使用须知参考[原仓库](https://github.com/Elegycloud/clash-for-linux-backup)。
+>
+> 本仓库及本分支内容仅供本人 Shell 编程的入门学习使用，不具备参考意义和使用价值...
+
 ---
-
-# 项目介绍
-
-此项目是通过使用开源项目[clash（已跑路）](https://github.com/Dreamacro/clash)作为核心程序，再结合脚本实现简单的代理功能。<br>
-clash核心备份仓库[Clash-backup](https://github.com/Elegycloud/clash-for-linux-backup)
-
-主要是为了解决我们在服务器上下载GitHub等一些国外资源速度慢的问题。
-
-# 免责声明
-1.本项目使用GNU通用公共许可证（GPL）v3.0进行许可。您可以查看本仓库LICENSE进行了解
-
-2.本项目的原作者保留所有知识产权。作为使用者，您需遵守GPL v3.0的要求，并承担因使用本项目而产生的任何风险。
-
-3.本项目所提供的内容不提供任何明示或暗示的保证。在法律允许的范围内，原作者概不负责，不论是直接的、间接的、特殊的、偶然的或后果性的损害。
-
-4.本项目与仓库的创建者和维护者完全无关，仅作为备份仓库，任何因使用本项目而引起的纠纷、争议或损失，与仓库的作者和维护者完全无关。
-
-5.对于使用本项目所导致的任何纠纷或争议，使用者必须遵守自己国家的法律法规，并且需自行解决因使用本项目而产生的任何法律法规问题。
-
-# 题外话
-由于作者已经跑路，当前仓库仅进行备份，若有侵犯您的权利，请提交issues我会看到并删除仓库<br>
-
-（2024/06/07 留：）其次就是，issue我没有时间回，很抱歉，欢迎各位来一起维护和解决这个仓库的问题！<br>
-
-clash for linux 备份(备份号：202311091510)。
-若喜欢本项目，请点个小星星！
-<br>
-
-# 使用须知
-
-- 运行本项目建议使用root用户，或者使用 sudo 提权。
-- 使用过程中如遇到问题，请优先查已有的 [issues](https://github.com/Elegycloud/clash-for-linux-backup/issues)。
-- 在进行issues提交前，请替换提交内容中是敏感信息（例如：订阅地址）。
-- 本项目是基于 [clash（已跑路）](https://github.com/Dreamacro/clash) 、[yacd](https://github.com/haishanh/yacd) 进行的配置整合，关于clash、yacd的详细配置请去原项目查看。
-- 此项目不提供任何订阅信息，请自行准备Clash订阅地址。
-- 运行前请手动更改`.env`文件中的`CLASH_URL`变量值，否则无法正常运行。
-- 当前在RHEL系列和Debian,Kali Linux,ubuntu以及Linux系统中测试过，其他系列可能需要适当修改脚本。
-- 支持 x86_64/aarch64 平台
-- 【注意：部分带有桌面端Linux系统的需要在浏览器设置代理！否则有可能无法使用！】
-- 【若系统代理无法使用，但是想要系统代理，请修改尝试修改start.sh中的端口后执行环境变量命令！】
-- 【还是无法使用请更换当前网络环境（也是其中一个因素！）】
-- 【部分Linux系统会出现谷歌，twitter，youtube等可能无法ping通，正常现象！】
-> **注意**：当你在使用此项目时，遇到任何无法独自解决的问题请优先前往 [Issues](https://github.com/Elegycloud/clash-for-linux-backup/issue) 寻找解决方法。由于空闲时间有限，后续将不再对Issues中 “已经解答”、“已有解决方案” 的问题进行重复性的回答。
-
-<br>
-
-# 使用教程
 
 ```bash
 git clone https://github.com/toulzx/clash-for-linux-backup.git clash-for-linux
@@ -55,26 +12,28 @@ cd clash-for-linux
 git checkout dev
 ```
 
+## 启动服务
+
 编辑 `.env` 文件，填写订阅链接 `CLASH_URL`、`CLASH_SECRET`。（secret 值为空时，脚本将自动生成随机字符串）
 
-获取（更新）代理配置：
+获取/更新订阅链接（配置文件）：
 ```bash
 sudo bash start.sh
 ```
 
-系统代理开关的环境变量随终端自启：
+proxy 开关随终端自启：
 ```bash
 echo "source /etc/profile.d/clash.sh" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-启动/关闭代理：
+启动/关闭 proxy：
 ```bash
 proxy_on
 proxy_off
 ```
 
-Ping 不同是正常的，可测试：
+Ping 不通是正常的，可测试：
 ```
 git clone https://github.com/AasishPokhrel/shit.git
 # and
@@ -83,7 +42,7 @@ wget https://huggingface.co/deepseek-ai/DeepSeek-R1/resolve/main/README.md
 
 ## 重启服务
 
-不会获取（更新）订阅链接的配置。但是可以同步手动更新的 `conf/config.yaml` 配置。
+此操作不会获取/更新订阅链接（配置文件）。只会同步本地 `conf/config.yaml` 配置并重启服务。
 
 ```bash
 sudo bash restart.sh
@@ -95,22 +54,6 @@ sudo bash restart.sh
 sudo bash shutdown.sh
 proxy_off
 ```
-
-## Clash Dashboard
-
-- 访问 Clash Dashboard
-
-通过浏览器访问 `start.sh` 执行成功后输出的地址，例如：http://192.168.0.1:9090/ui
-
-- 登录管理界面
-
-在`API Base URL`一栏中输入：http://\<ip\>:9090 ，在`Secret(optional)`一栏中输入启动成功后输出的Secret。
-
-点击Add并选择刚刚输入的管理界面地址，之后便可在浏览器上进行一些配置。
-
-- 更多教程
-
-此 Clash Dashboard 使用的是[yacd](https://github.com/haishanh/yacd)项目，详细使用方法请移步到yacd上查询。
 
 
 # 排查
@@ -135,38 +78,40 @@ https_proxy=http://127.0.0.1:7890
 
 检查相关服务是否存在：
 ```
-ps -ef | grep [c]lash-linux- | wc -l
+$ ps -ef | grep [c]lash-linux- | wc -l
 1
 ```
 
-有些应用有自己的代理管理：
+有些应用有自己的 proxy 管理：
 ```bash
 # Ubuntu 图形界面网络有个设置需要改
 
-# git 设置代理和系统变量保持一致
+# git 设置 proxy 和系统变量保持一致
 git config --global http.useEnvironmentVariables true	# 只管 http，sock5 还是需要单独配置
 git config --global --get http.proxy
 git config --global --get https.proxy
 ```
 
+For more, refer to issues.
+
 # 管理
 
 ## Dashboard
 
-1. 如果在 Linux 本机操作，且支持图形化界面，使用浏览器访问 `http://127.0.0.1:9090/ui` 即可。
+支持选择节点、修改流量端口等。
 
-2. 如果是远程连接，可以考虑端口转发 9090，仍然是本机浏览器访问 `http://127.0.0.1:9090/ui` 即可。
-    - 如果是 vscode 远程连接， 可能会自动出发代理端口的转发（默认 7890）。如果本机和服务器都是使用默认的代理端口，则端口转发会导致本机代理端口与服务器连接，最终导致本机使用服务器的梯子，然后会因为终端关闭或 proxy_off 等原因，连累本机也无法访问外网，因此，需要修改默认的端口，或者手动断开端口转发。
+此 Clash Dashboard 使用的是[yacd](https://github.com/haishanh/yacd)项目，详细使用方法请移步该仓库。
 
-3. `./temp/template_config.yaml` 默认设置公网转发 `0.0.0.0:9090`，如果设备支持公网访问，此时可以公网 IP 访问 `http://[IP]:9090/ui`
+1. 访问 Dashboard：
+    1. 如果在 Linux 本机操作，且支持图形化界面，使用浏览器访问 `http://127.0.0.1:9090/ui` 即可。
+    2. 如果是远程连接，可以考虑端口转发 9090，仍然是本机浏览器访问 `http://127.0.0.1:9090/ui` 即可。
+    3. `./temp/template_config.yaml` 默认设置公网转发 `0.0.0.0:9090`，如果设备支持公网访问，此时可以公网 IP 访问 `http://[IP]:9090/ui`
+
+2. 登录 Dashboard：在 `API Base URL` 填写上述访问链接（如 `http://localhost:9090`），在 `Secret` 一栏中输入启动成功后输出的 Secret。
 
 
-## 终端界面选择代理节点
+## 终端界面选择节点
 
 部分用户无法通过浏览器使用 Clash Dashboard 进行节点选择、代理模式修改等操作，为了方便用户可以在Linux终端进行操作，下面提供了一个功能简单的脚本以便用户可以临时通过终端界面进行配置。
 
 脚本存放位置：`scripts/clash_proxy-selector.sh`
-
-> **注意：**
->
-> 使用脚本前，需要修改脚本中的 **Secret** 变量值为上述启动脚本输出的值，或者与 `.env` 文件中定义的 **CLASH_SECRET** 变量值保持一致。
